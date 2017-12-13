@@ -33,6 +33,10 @@ class brute:
             self.loggedIn = True
 
     def login(self):
+        """
+        So it's been adjusted for blue tints - literally just tried it and it works. First sign up for your 3 stores, pick you size and lock it in. Then run this program on the account, when its done (it will tell you when). Log out and back in. Have fun
+        :return:
+        """
         endpoint = 'https://pciis02.eastbay.com/API/v3/Customers/WebAccount/Authenticate/'
         payload = {
             "email": self.username,
@@ -41,6 +45,7 @@ class brute:
             "companyId": "21",
             "vipStoreNumber": "25273"}
         r = self.session.post(endpoint, data=json.dumps(payload))
+        print r.text
         if r.status_code == 200:
             print 'Login success'
         else:
@@ -49,7 +54,7 @@ class brute:
         self.authkey = r.json()['authKey']
         self.jwt = r.json()['JWT']
         self.custId = r.json()['webCustomerId']
-        payload = '[{"platform_id":10,"release_id":4600,"packet_type":9,"subpacket_type":1,"encrypted":"true","os_version":"4.4.2","latitude":-33.8688183,"longitude":151.20929,"app_version":"2.8.0","sdk_version":"4.6.1","dev_key":"wRcbEq7gD46s43QL1pPMt3HC","clienttype_id":239,"dev_name":"Foot Locker","device_id":"5af786d1-5984-40f0-95db-6961e2a7fb8c"},{"email":"104756850","zipcode":"USEGPS","request_type":"register"}]'
+        payload = '[{"platform_id":10,"release_id":4600,"packet_type":9,"subpacket_type":1,"encrypted":"true","os_version":"4.4.2","latitude":-33.8688183,"longitude":151.20929,"app_version":"2.8.0","sdk_version":"4.6.1","dev_key":"wRcbEq7gD46s43QL1pPMt3HC","clienttype_id":239,"dev_name":"Foot Locker","device_id":"5af786d1-5984-40f0-95db-6961e2a7fb8c"},{"email":"%s","zipcode":"USEGPS","request_type":"register"}]' % self.custId
         #payload = json.dumps(payload)
         self.session.headers={'Host' : 'footlocker.gpshopper.com',
                               'User-Agent' : 'Dalvik/1.6.0 (Linux; U; Android 4.4.2; HUAWEI TIT-TL00 Build/KOT49H)',
